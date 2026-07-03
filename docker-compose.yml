@@ -1,0 +1,23 @@
+services:
+
+  compute-fabric:
+
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+
+    container_name: compute-fabric
+
+    volumes:
+      - ../:/workspace
+
+    stdin_open: true
+    tty: true
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
