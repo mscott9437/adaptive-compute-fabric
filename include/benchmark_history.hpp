@@ -91,4 +91,28 @@ public:
 	most_common_winning_block_size(
     	const std::vector<KernelReport>& reports
 	);
+
+	static double average_memory_pressure(
+		const std::vector<KernelReport>& reports
+	);
+
+	static double average_execution_pressure(
+		const std::vector<KernelReport>& reports
+	);
+
+	static double average_scheduler_pressure(
+		const std::vector<KernelReport>& reports
+	);
+
+	static double average_cache_hit_ratio(
+		const std::vector<KernelReport>& reports
+	);
+
+	static std::string most_common_workflow(
+		const std::vector<KernelReport>& reports
+	);
+
+	static std::string most_common_classification(
+		const std::vector<KernelReport>& reports
+	);
 };

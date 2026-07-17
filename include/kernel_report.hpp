@@ -85,4 +85,67 @@ struct KernelReport
 	
 	std::vector<std::string>
     	classification_evidence;
+
+	float inst_executed_per_cycle_active = 0.0f;
+
+	float inst_executed_per_cycle_active_pct = 0.0f;
+
+	float stall_math_pipe_pct = 0.0f;
+
+	float stall_mio_pct = 0.0f;
+
+	float stall_tex_pipe_pct = 0.0f;
+
+	float inst_fp32 = 0.0f;
+	float inst_fp64 = 0.0f;
+
+	float inst_integer = 0.0f;
+	float inst_memory = 0.0f;
+
+	float l1_hit_rate_pct = 0.0f;
+	float l2_hit_rate_pct = 0.0f;
+
+	float l1_throughput_pct = 0.0f;
+	float l2_throughput_pct = 0.0f;
+
+	float l1_global_load_requests = 0.0f;
+
+	float l1_global_store_requests = 0.0f;
+
+	float l2_sector_average = 0.0f;
+
+	float l2_requests = 0.0f;
+
+	float l2_hits = 0.0f;
+
+	float l2_misses = 0.0f;
+
+	// Workflow
+
+	std::string workflow;
+
+	// KernelState
+
+	bool memory_bound = false;
+	bool execution_bound = false;
+	bool scheduler_bound = false;
+	bool cache_bound = false;
+
+	bool execution_pipe_bound = false;
+	bool memory_pipeline_bound = false;
+	bool texture_pipeline_bound = false;
+
+	float memory_pressure = 0.0f;
+	float execution_pressure = 0.0f;
+	float scheduler_pressure = 0.0f;
+	float cache_pressure = 0.0f;
+
+	float utilization_score = 0.0f;
+	float cache_hit_ratio = 0.0f;
+
+	// Instruction mix
+
+	float fp32_ratio = 0.0f;
+	float integer_ratio = 0.0f;
+	float memory_ratio = 0.0f;
 };

@@ -6,6 +6,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <unordered_map>
 
 #include <cuda_runtime.h>
 
@@ -24,6 +25,13 @@
 
 #include "../include/nsight_capture.hpp"
 #include "../device/nsight_profiler.hpp"
+
+#include "../include/kernel_explainer.hpp"
+#include "../include/kernel_state.hpp"
+
+#include "../include/kernel_optimizer.hpp"
+#include "../include/kernel_ir.hpp"
+#include "../include/kernel_workflow.hpp"
 
 void create_results_directories()
 {
@@ -323,14 +331,6 @@ int main(
 	
 	auto runner_up_vector_add =
     	runner.vector_add_runner_up();
-
-	std::cout
-    	<< "\nDEBUG VECTOR\n"
-    	<< "Winner: "
-    	<< best_vector_add.tested_block_size
-    	<< "\nRunner-Up: "
-    	<< runner_up_vector_add.tested_block_size
-    	<< "\n";
     
 	if (previous_vector_add)
 	{
@@ -339,40 +339,89 @@ int main(
         	best_vector_add
     	);
 	}
+	
+    auto vector_add_analysis =
+    runner.profile_vector_add_winner(
+        best_vector_add
+    );
 
-	auto profiled_vector_add =
-    	runner.profile_vector_add_winner(
-        	best_vector_add
-    	);
+    auto vector_add_runner_up_analysis =
+    runner.profile_vector_add_runner_up(
+        runner_up_vector_add
+    );
+
+    ConsoleReporter::print_nsight_summary(
+        vector_add_analysis.report
+    );
+
+    ConsoleReporter::print_kernel_state(
+        vector_add_analysis.state
+    );
+
+    ConsoleReporter::print_classification(
+        vector_add_analysis.classification
+    );
+
+    ConsoleReporter::print_optimizer(
+        vector_add_analysis.optimization
+    );
+
+    ConsoleReporter::print_ir_summary(
+        vector_add_analysis.ir
+    );
+
+    ConsoleReporter::print_workflow(
+        vector_add_analysis.workflow
+    );
 	
-	auto profiled_runner_up_vector_add =
-    	runner.profile_vector_add_runner_up(
-        	runner_up_vector_add
-    	);
+    print_nsight_comparison(
+        "vector_add",
+        vector_add_analysis.report,
+        vector_add_runner_up_analysis.report
+    );
+
+	auto explanation_vector_add =
+        KernelExplainer::explain(
+            vector_add_analysis.report,
+            vector_add_runner_up_analysis.report
+        );
 	
-	ConsoleReporter::print_nsight_summary(
-    	profiled_vector_add
-	);
-	
-	ConsoleReporter::print_nsight_summary(
-    	profiled_runner_up_vector_add
-	);
-	
-	print_nsight_comparison(
-    	"vector_add",
-    	profiled_vector_add,
-    	profiled_runner_up_vector_add
+	ConsoleReporter::print_explanation(
+    	explanation_vector_add
 	);
 
-	ConsoleReporter::print_winner_comparison(
-    		profiled_vector_add,
-    		profiled_runner_up_vector_add
-		);
-	
-	export_csv_row(
-    	best_vector_add,
-    	"results/vector_add/history.csv"
-	);
+    ConsoleReporter::print_winner_comparison(
+        vector_add_analysis.report,
+        vector_add_runner_up_analysis.report
+    );
+
+    auto vector_add_report =
+    vector_add_analysis.report;
+
+    vector_add_report.kernel_classification =
+    vector_add_analysis.classification.label;
+
+    vector_add_report.classification_confidence =
+    vector_add_analysis.classification.confidence;
+
+    vector_add_report.workflow =
+    vector_add_analysis.workflow.type;
+
+    export_csv_row(
+        vector_add_report,
+        vector_add_analysis.state,
+        vector_add_analysis.classification,
+        vector_add_analysis.workflow,
+        "results/vector_add/history.csv"
+    );
+
+    export_csv_row(
+        vector_add_report,
+        vector_add_analysis.state,
+        vector_add_analysis.classification,
+        vector_add_analysis.workflow,
+        "results/vector_add/full_history.csv"
+    );
 
 	auto previous_reduction =
     	HistoryLoader::load_best(
@@ -388,15 +437,7 @@ int main(
 	
 	auto runner_up_reduction =
     	runner.reduction_runner_up();
-	
-	std::cout
-    	<< "\nDEBUG REDUCTION\n"
-    	<< "Winner: "
-    	<< best_reduction.tested_block_size
-    	<< "\nRunner-Up: "
-    	<< runner_up_reduction.tested_block_size
-    	<< "\n";
-    
+
 	if (previous_reduction)
 	{
     	BenchmarkComparator::compare(
@@ -405,54 +446,153 @@ int main(
     	);
 	}
 
-	auto profiled_reduction =
-    	runner.profile_reduction_winner(
-        	best_reduction
-    	);
-	
-	auto profiled_runner_up_reduction =
-    	runner.profile_reduction_runner_up(
-        	runner_up_reduction
-    	);
-	
-	ConsoleReporter::print_nsight_summary(
-    	profiled_reduction
-	);
-	
-	ConsoleReporter::print_nsight_summary(
-    	profiled_runner_up_reduction
-	);
-	
-	print_nsight_comparison(
-    	"reduction",
-    	profiled_reduction,
-    	profiled_runner_up_reduction
-	);
+    auto reduction_analysis =
+    runner.profile_reduction_winner(
+        best_reduction
+    );
 
-	ConsoleReporter::print_winner_comparison(
-    	profiled_reduction,
-    	profiled_runner_up_reduction
-	);
+    auto reduction_runner_up_analysis =
+    runner.profile_reduction_runner_up(
+        runner_up_reduction
+    );
 
-	export_csv_row(
-    	best_reduction,
-    	"results/reduction/history.csv"
+    ConsoleReporter::print_nsight_summary(
+        reduction_analysis.report
+    );
+
+    ConsoleReporter::print_kernel_state(
+        reduction_analysis.state
+    );
+
+    ConsoleReporter::print_classification(
+        reduction_analysis.classification
+    );
+
+    ConsoleReporter::print_optimizer(
+        reduction_analysis.optimization
+    );
+
+    ConsoleReporter::print_ir_summary(
+        reduction_analysis.ir
+    );
+
+    ConsoleReporter::print_workflow(
+        reduction_analysis.workflow
+    );
+	
+    print_nsight_comparison(
+        "reduction",
+        reduction_analysis.report,
+        reduction_runner_up_analysis.report
+    );
+	
+	auto explanation_reduction =
+        KernelExplainer::explain(
+            reduction_analysis.report,
+            reduction_runner_up_analysis.report
+        );
+
+	ConsoleReporter::print_explanation(
+    	explanation_reduction
 	);
+	
+    ConsoleReporter::print_winner_comparison(
+        reduction_analysis.report,
+        reduction_runner_up_analysis.report
+    );
+
+    auto reduction_report =
+    reduction_analysis.report;
+
+    reduction_report.kernel_classification =
+    reduction_analysis.classification.label;
+
+    reduction_report.classification_confidence =
+    reduction_analysis.classification.confidence;
+
+    reduction_report.workflow =
+    reduction_analysis.workflow.type;
+
+    export_csv_row(
+        reduction_report,
+        reduction_analysis.state,
+        reduction_analysis.classification,
+        reduction_analysis.workflow,
+        "results/reduction/history.csv"
+    );
 
     print_final_summary(
         best_vector_add,
         best_reduction
     );
-    
-    auto full_history =
-        BenchmarkHistory::load_csv(
-            "results/vector_add/full_history.csv"
-        );
 
-    auto winner_history =
-        BenchmarkHistory::load_csv(
-            "results/vector_add/history.csv"
-        );
+    export_csv_row(
+        reduction_report,
+        reduction_analysis.state,
+        reduction_analysis.classification,
+        reduction_analysis.workflow,
+        "results/reduction/full_history.csv"
+    );
+
+    auto vector_full_history =
+    BenchmarkHistory::load_csv(
+        "results/vector_add/full_history.csv"
+    );
+
+    auto reduction_full_history =
+    BenchmarkHistory::load_csv(
+        "results/reduction/full_history.csv"
+    );
+
+    std::vector<KernelReport> analytics_history;
+
+    for (const auto& report : vector_full_history)
+    {
+        if (report.memory_pressure > 0.0f ||
+            report.execution_pressure > 0.0f ||
+            report.scheduler_pressure > 0.0f)
+        {
+            analytics_history.push_back(report);
+        }
+    }
+
+    for (const auto& report : reduction_full_history)
+    {
+        if (report.memory_pressure > 0.0f ||
+            report.execution_pressure > 0.0f ||
+            report.scheduler_pressure > 0.0f)
+        {
+            analytics_history.push_back(report);
+        }
+    }
+
+    std::vector<KernelReport> full_history =
+    vector_full_history;
+
+    full_history.insert(
+        full_history.end(),
+                        reduction_full_history.begin(),
+                        reduction_full_history.end()
+    );
+
+    auto vector_winner_history =
+    BenchmarkHistory::load_csv(
+        "results/vector_add/history.csv"
+    );
+
+    auto reduction_winner_history =
+    BenchmarkHistory::load_csv(
+        "results/reduction/history.csv"
+    );
+
+    std::vector<KernelReport> winner_history =
+    vector_winner_history;
+
+    winner_history.insert(
+        winner_history.end(),
+                          reduction_winner_history.begin(),
+                          reduction_winner_history.end()
+    );
 
 	auto tested_frequency =
     	BenchmarkHistory::
@@ -607,5 +747,68 @@ int main(
            )
         << " ms\n";
     
+        std::cout
+        << "Average Memory Pressure: "
+        << BenchmarkHistory::average_memory_pressure(
+            analytics_history
+        )
+        << "%\n";
+
+        std::cout
+        << "Average Execution Pressure: "
+        << BenchmarkHistory::average_execution_pressure(
+            analytics_history
+        )
+        << "%\n";
+
+        std::cout
+        << "Average Scheduler Pressure: "
+        << BenchmarkHistory::average_scheduler_pressure(
+            analytics_history
+        )
+        << "%\n";
+
+        std::cout
+        << "Average Cache Hit Ratio: "
+        << BenchmarkHistory::average_cache_hit_ratio(
+            analytics_history
+        )
+        << "\n";
+
+        std::cout
+        << "Most Common Workflow: "
+        << BenchmarkHistory::most_common_workflow(
+            full_history
+        )
+        << "\n";
+
+        std::unordered_map<std::string, int> counts;
+
+        for (const auto& report : full_history)
+        {
+            if (!report.kernel_classification.empty())
+            {
+                counts[report.kernel_classification]++;
+            }
+        }
+
+        std::string most_common;
+
+        int highest = 0;
+
+        for (const auto& [label, count] : counts)
+        {
+            if (count > highest)
+            {
+                highest = count;
+                most_common = label;
+            }
+        }
+
+        std::cout
+        << "Most Common Classification: "
+        << most_common
+        << "\n";
+
     return 0;
 }

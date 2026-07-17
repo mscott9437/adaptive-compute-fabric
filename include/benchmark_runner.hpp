@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "kernel_report.hpp"
+#include "kernel_analysis.hpp"
 
 class BenchmarkRunner
 {
@@ -32,27 +33,31 @@ public:
     	const std::string& session_id
 	);
 
-	KernelReport profile_vector_add_winner(
-    	KernelReport& report
+	KernelAnalysis
+	profile_vector_add_winner(
+		KernelReport&
 	);
-	
-	KernelReport profile_reduction_winner(
-    	KernelReport& report
+
+	KernelAnalysis
+	profile_vector_add_runner_up(
+		KernelReport&
+	);
+
+	KernelAnalysis
+	profile_reduction_winner(
+		KernelReport&
+	);
+
+	KernelAnalysis
+	profile_reduction_runner_up(
+		KernelReport&
 	);
 
 	KernelReport
 	vector_add_runner_up() const;
-	
+
 	KernelReport
 	reduction_runner_up() const;
-	
-	KernelReport profile_vector_add_runner_up(
-    	KernelReport& report
-	);
-	
-	KernelReport profile_reduction_runner_up(
-    	KernelReport& report
-	);
 	
 private:
 
@@ -61,4 +66,8 @@ private:
 
     std::vector<KernelReport>
         last_reduction_results;
+
+	KernelAnalysis analyze_kernel(
+		KernelReport report
+	);
 };

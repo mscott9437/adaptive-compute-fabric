@@ -1,11 +1,18 @@
 #include "../include/csv_exporter.hpp"
 
+#include "../include/kernel_state.hpp"
+#include "../include/kernel_classifier.hpp"
+#include "../include/kernel_workflow.hpp"
+
 #include <fstream>
 #include <filesystem>
 
 void export_csv_row(
-    const KernelReport& report,
-    const std::string& path
+	const KernelReport& report,
+	const KernelState& state,
+	const KernelClassification& classification,
+	const KernelWorkflow& workflow,
+	const std::string& path
 )
 {
     bool write_header =
@@ -51,7 +58,41 @@ void export_csv_row(
 		<< "stall_barrier_pct,"
 		
 		<< "kernel_classification,"
-		<< "classification_confidence\n";
+		<< "classification_confidence"
+
+		<< ",workflow"
+
+		<< ",memory_bound"
+
+		<< ",execution_bound"
+
+		<< ",scheduler_bound"
+
+		<< ",cache_bound"
+
+		<< ",execution_pipe_bound"
+
+		<< ",memory_pipeline_bound"
+
+		<< ",texture_pipeline_bound"
+
+		<< ",memory_pressure"
+
+		<< ",execution_pressure"
+
+		<< ",scheduler_pressure"
+
+		<< ",cache_pressure"
+
+		<< ",utilization_score"
+
+		<< ",cache_hit_ratio"
+
+		<< ",fp32_ratio"
+
+		<< ",integer_ratio"
+
+		<< ",memory_ratio\n";
     }
 
 		out
@@ -85,9 +126,75 @@ void export_csv_row(
 		
 		<< report.stall_not_selected_pct << ","
 		<< report.stall_barrier_pct << ","
-		
-		<< report.kernel_classification << ","
-		<< report.classification_confidence
-		
+
+		<< classification.label << ","
+		<< classification.confidence << ","
+
+		<< workflow.type
+
+		<< ","
+
+		<< state.memory_bound
+
+		<< ","
+
+		<< state.execution_bound
+
+		<< ","
+
+		<< state.scheduler_bound
+
+		<< ","
+
+		<< state.cache_bound
+
+		<< ","
+
+		<< state.execution_pipe_bound
+
+		<< ","
+
+		<< state.memory_pipeline_bound
+
+		<< ","
+
+		<< state.texture_pipeline_bound
+
+		<< ","
+
+		<< state.memory_pressure
+
+		<< ","
+
+		<< state.execution_pressure
+
+		<< ","
+
+		<< state.scheduler_pressure
+
+		<< ","
+
+		<< state.cache_pressure
+
+		<< ","
+
+		<< state.utilization_score
+
+		<< ","
+
+		<< state.cache_hit_ratio
+
+		<< ","
+
+		<< state.fp32_ratio
+
+		<< ","
+
+		<< state.integer_ratio
+
+		<< ","
+
+		<< state.memory_ratio
+
 		<< "\n";
 }

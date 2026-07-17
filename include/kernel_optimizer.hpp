@@ -6,20 +6,16 @@
 #include <string>
 #include <vector>
 
-struct KernelClassification
+struct KernelOptimization
 {
-    std::string label;
-
-    double confidence = 0.0;
-
-    std::vector<std::string> evidence;
+    std::vector<std::string> recommendations;
 };
 
-class KernelClassifier
+class KernelOptimizer
 {
 public:
 
-    static KernelClassification classify(
+    static KernelOptimization analyze(
         const KernelState& state,
         const KernelReport& report
     );

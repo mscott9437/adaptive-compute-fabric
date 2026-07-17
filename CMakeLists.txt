@@ -31,6 +31,16 @@ add_executable(
 
     src/kernel_classifier.cpp
 
+    src/kernel_explainer.cpp
+
+    src/kernel_ir.cpp
+
+    src/kernel_optimizer.cpp
+
+    src/kernel_state.cpp
+
+    src/kernel_workflow.cpp
+
     device/cuda_profiler.cu
 
     device/nsight_profiler.cpp

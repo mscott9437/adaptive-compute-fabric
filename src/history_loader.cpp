@@ -128,7 +128,95 @@ HistoryLoader::load_best(
 		
 		std::getline(ss, token, ',');
 		current.efficiency_score = std::stod(token);
-		
+
+        std::getline(ss, token, ',');
+        current.dram_throughput_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.compute_memory_throughput_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.nsight_kernel_time_ms =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.max_warps_active_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.sm_throughput_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.warps_active_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.warps_eligible_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.stall_long_scoreboard_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.stall_short_scoreboard_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.stall_not_selected_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, token, ',');
+        current.stall_barrier_pct =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, current.kernel_classification, ',');
+
+        std::getline(ss, token, ',');
+        current.classification_confidence =
+        token.empty() ? 0.0 : std::stod(token);
+
+        std::getline(ss, current.workflow, ',');
+
+        std::getline(ss, token, ',');
+        current.memory_pressure =
+        token.empty() ? 0.0f : std::stof(token);
+
+        std::getline(ss, token, ',');
+        current.execution_pressure =
+        token.empty() ? 0.0f : std::stof(token);
+
+        std::getline(ss, token, ',');
+        current.scheduler_pressure =
+        token.empty() ? 0.0f : std::stof(token);
+
+        std::getline(ss, token, ',');
+        current.cache_pressure =
+        token.empty() ? 0.0f : std::stof(token);
+
+        std::getline(ss, token, ',');
+        current.utilization_score =
+        token.empty() ? 0.0f : std::stof(token);
+
+        std::getline(ss, token, ',');
+        current.cache_hit_ratio =
+        token.empty() ? 0.0f : std::stof(token);
+
+        std::getline(ss, token, ',');
+        current.fp32_ratio =
+        token.empty() ? 0.0f : std::stof(token);
+
+        std::getline(ss, token, ',');
+        current.integer_ratio =
+        token.empty() ? 0.0f : std::stof(token);
+
+        std::getline(ss, token, ',');
+        current.memory_ratio =
+        token.empty() ? 0.0f : std::stof(token);
+
         if (
             !found
             ||

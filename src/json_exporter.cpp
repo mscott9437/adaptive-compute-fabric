@@ -1,10 +1,21 @@
 #include "../include/json_exporter.hpp"
 
+#include "../include/kernel_state.hpp"
+#include "../include/kernel_classifier.hpp"
+#include "../include/kernel_optimizer.hpp"
+#include "../include/kernel_ir.hpp"
+#include "../include/kernel_workflow.hpp"
+
 #include <fstream>
 
 void export_json(
-    const KernelReport& report,
-    const std::string& path
+	const KernelReport& report,
+	const KernelState& state,
+	const KernelClassification& classification,
+	const KernelOptimization& optimization,
+	const KernelIR& ir,
+	const KernelWorkflow& workflow,
+	const std::string& path
 )
 {
     std::ofstream out(path);
@@ -155,6 +166,113 @@ void export_json(
 		<< "  \"classification_confidence\": "
 		<< report.classification_confidence
 		<< "\n"
-		
+
+		<< ",\n"
+
+		<< "  \"kernel_state\": {\n"
+
+		<< "    \"memory_pressure\": "
+		<< state.memory_pressure
+		<< ",\n"
+
+		<< "    \"execution_pressure\": "
+		<< state.execution_pressure
+		<< ",\n"
+
+		<< "    \"scheduler_pressure\": "
+		<< state.scheduler_pressure
+		<< ",\n"
+
+		<< "    \"cache_pressure\": "
+		<< state.cache_pressure
+		<< ",\n"
+
+		<< "    \"utilization_score\": "
+		<< state.utilization_score
+		<< ",\n"
+
+		<< "    \"cache_hit_ratio\": "
+		<< state.cache_hit_ratio
+		<< ",\n"
+
+		<< "    \"fp32_ratio\": "
+		<< state.fp32_ratio
+		<< ",\n"
+
+		<< "    \"integer_ratio\": "
+		<< state.integer_ratio
+		<< ",\n"
+
+		<< "    \"memory_ratio\": "
+		<< state.memory_ratio
+		<< "\n"
+
+		<< "  },\n"
+
+		<< "  \"classification\": {\n"
+
+		<< "    \"label\": \""
+		<< classification.label
+		<< "\",\n"
+
+		<< "    \"confidence\": "
+		<< classification.confidence
+		<< "\n"
+
+		<< "  },\n"
+
+		<< "  \"optimization\": {\n"
+
+		<< "    \"recommendations\": [";
+
+		for(size_t i=0;i<optimization.recommendations.size();++i)
+		{
+			out
+			<< "\""
+			<< optimization.recommendations[i]
+			<< "\"";
+
+			if(i+1 != optimization.recommendations.size())
+				out << ",";
+		}
+
+		out
+
+		<< "]\n"
+
+		<< "  },\n"
+
+		<< "  \"ir\": {\n"
+
+		<< "    \"workflow\": \""
+		<< ir.workflow
+		<< "\",\n"
+
+		<< "    \"bottleneck\": \""
+		<< ir.bottleneck
+		<< "\",\n"
+
+		<< "    \"dominant_pipeline\": \""
+		<< ir.dominant_pipeline
+		<< "\",\n"
+
+		<< "    \"dominant_instruction\": \""
+		<< ir.dominant_instruction
+		<< "\"\n"
+
+		<< "  },\n"
+
+		<< "  \"workflow\": {\n"
+
+		<< "    \"type\": \""
+		<< workflow.type
+		<< "\",\n"
+
+		<< "    \"summary\": \""
+		<< workflow.summary
+		<< "\"\n"
+
+		<< "  }\n"
+
 		<< "}\n";
 }

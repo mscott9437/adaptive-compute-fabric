@@ -147,7 +147,55 @@ static void populate_nsight_data(
 
 	report.sm_throughput_pct =
     	metrics.sm_throughput_pct;
-	
+
+    report.inst_executed_per_cycle_active_pct =
+        metrics.inst_executed_per_cycle_active_pct;
+
+    report.stall_math_pipe_pct =
+        metrics.stall_math_pipe_pct;
+
+    report.stall_mio_pct =
+        metrics.stall_mio_pct;
+
+    report.stall_tex_pipe_pct =
+        metrics.stall_tex_pipe_pct;
+
+    report.inst_fp32 =
+        metrics.inst_fp32;
+
+    report.inst_fp64 =
+        metrics.inst_fp64;
+
+    report.inst_integer =
+        metrics.inst_integer;
+
+    report.inst_memory =
+        metrics.inst_memory;
+
+    report.l1_hit_rate_pct =
+        metrics.l1_hit_rate_pct;
+
+    report.l2_hit_rate_pct =
+        metrics.l2_hit_rate_pct;
+
+    report.l1_global_load_requests =
+    metrics.l1_global_load_requests;
+
+    report.l1_global_store_requests =
+    metrics.l1_global_store_requests;
+
+    report.l2_sector_average =
+    metrics.l2_sector_average;
+
+    report.l2_requests =
+    metrics.l2_requests;
+
+    report.l2_hits =
+    metrics.l2_hits;
+
+    report.l2_misses =
+    metrics.l2_misses;
+
 	report.warps_eligible_pct =
     	metrics.warps_eligible_pct;
 	
@@ -162,6 +210,122 @@ static void populate_nsight_data(
 	
 	report.stall_barrier_pct =
     	metrics.stall_barrier_pct;
+}
+
+static void
+populate_analysis_report(
+    KernelAnalysis& analysis
+)
+{
+    auto& report = analysis.report;
+    const auto& state = analysis.state;
+
+    report.kernel_classification =
+    analysis.classification.label;
+
+    report.classification_confidence =
+    analysis.classification.confidence;
+
+    report.classification_evidence =
+    analysis.classification.evidence;
+
+    report.workflow =
+    analysis.workflow.type;
+
+    report.memory_bound =
+    state.memory_bound;
+
+    report.execution_bound =
+    state.execution_bound;
+
+    report.scheduler_bound =
+    state.scheduler_bound;
+
+    report.cache_bound =
+    state.cache_bound;
+
+    report.execution_pipe_bound =
+    state.execution_pipe_bound;
+
+    report.memory_pipeline_bound =
+    state.memory_pipeline_bound;
+
+    report.texture_pipeline_bound =
+    state.texture_pipeline_bound;
+
+    report.memory_pressure =
+    state.memory_pressure;
+
+    report.execution_pressure =
+    state.execution_pressure;
+
+    report.scheduler_pressure =
+    state.scheduler_pressure;
+
+    report.cache_pressure =
+    state.cache_pressure;
+
+    report.utilization_score =
+    state.utilization_score;
+
+    report.cache_hit_ratio =
+    state.cache_hit_ratio;
+
+    report.fp32_ratio =
+    state.fp32_ratio;
+
+    report.integer_ratio =
+    state.integer_ratio;
+
+    report.memory_ratio =
+    state.memory_ratio;
+}
+
+KernelAnalysis
+BenchmarkRunner::analyze_kernel(
+    KernelReport report
+)
+{
+    KernelAnalysis analysis;
+
+    analysis.report =
+    report;
+
+    analysis.state =
+    KernelStateBuilder::build(
+        analysis.report
+    );
+
+    analysis.classification =
+    KernelClassifier::classify(
+        analysis.state,
+        analysis.report
+    );
+
+    analysis.optimization =
+    KernelOptimizer::analyze(
+        analysis.state,
+        analysis.report
+    );
+
+    analysis.ir =
+    KernelIRBuilder::build(
+        analysis.report,
+        analysis.state,
+        analysis.classification,
+        analysis.optimization
+    );
+
+    analysis.workflow =
+    KernelWorkflowBuilder::build(
+        analysis.ir
+    );
+
+    populate_analysis_report(
+        analysis
+    );
+
+    return analysis;
 }
 
 static std::string current_timestamp()
@@ -618,29 +782,41 @@ BenchmarkRunner::sweep_vector_add(
     		);
 		}
 
-		export_csv_row(
-    		report,
-    		"results/vector_add/latest_sweep.csv"
-		);
+		auto analysis =
+		analyze_kernel(report);
 
-		export_csv_row(
-    		report,
-    		"results/vector_add/full_history.csv"
-		);
+        export_csv_row(
+            report,
+            analysis.state,
+            analysis.classification,
+            analysis.workflow,
+            "results/vector_add/latest_sweep.csv"
+        );
 
-        ConsoleReporter::print(
-            report
+        export_csv_row(
+            report,
+            analysis.state,
+            analysis.classification,
+            analysis.workflow,
+            "results/vector_add/full_history.csv"
         );
 
         export_json(
             report,
+            analysis.state,
+            analysis.classification,
+            analysis.optimization,
+            analysis.ir,
+            analysis.workflow,
             "results/vector_add/"
             +
-            std::to_string(
-                block_size
-            )
+            std::to_string(block_size)
             +
             ".json"
+        );
+
+        ConsoleReporter::print(
+            report
         );
 
 		if (
@@ -683,8 +859,16 @@ BenchmarkRunner::sweep_vector_add(
 	);
 
     	
+    auto best_analysis =
+    analyze_kernel(best);
+
     export_json(
         best,
+        best_analysis.state,
+        best_analysis.classification,
+        best_analysis.optimization,
+        best_analysis.ir,
+        best_analysis.workflow,
         "results/vector_add/best.json"
     );
 
@@ -732,29 +916,41 @@ BenchmarkRunner::sweep_reduction(
     		);
 		}
 
-		export_csv_row(
-    		report,
-    		"results/reduction/latest_sweep.csv"
-		);
+		auto analysis =
+		analyze_kernel(report);
 
 		export_csv_row(
-    		report,
-    		"results/reduction/full_history.csv"
-		);
+            report,
+            analysis.state,
+            analysis.classification,
+            analysis.workflow,
+            "results/reduction/latest_sweep.csv"
+        );
 
-        ConsoleReporter::print(
-            report
+        export_csv_row(
+            report,
+            analysis.state,
+            analysis.classification,
+            analysis.workflow,
+            "results/reduction/full_history.csv"
         );
 
         export_json(
             report,
+            analysis.state,
+            analysis.classification,
+            analysis.optimization,
+            analysis.ir,
+            analysis.workflow,
             "results/reduction/"
             +
-            std::to_string(
-                block_size
-            )
+            std::to_string(block_size)
             +
             ".json"
+        );
+
+        ConsoleReporter::print(
+            report
         );
 
 		if (
@@ -796,15 +992,23 @@ BenchmarkRunner::sweep_reduction(
     	sweep_results
 	);
 	
+    auto best_analysis =
+    analyze_kernel(best);
+
     export_json(
         best,
+        best_analysis.state,
+        best_analysis.classification,
+        best_analysis.optimization,
+        best_analysis.ir,
+        best_analysis.workflow,
         "results/reduction/best.json"
     );
 
     return best;
 }
 
-KernelReport BenchmarkRunner::profile_vector_add_winner(
+KernelAnalysis BenchmarkRunner::profile_vector_add_winner(
     KernelReport& report
 )
 {
@@ -821,26 +1025,12 @@ KernelReport BenchmarkRunner::profile_vector_add_winner(
     );
 
     report.has_nsight_metrics =
-        metrics.valid;
+    metrics.valid;
 
-	auto classification =
-    	KernelClassifier::classify(
-        	report
-    	);
-	
-	report.kernel_classification =
-    	classification.label;
-	
-	report.classification_confidence =
-    	classification.confidence;
-
-	report.classification_evidence =
-    	classification.evidence;
-    
-    return report;
+    return analyze_kernel(report);
 }
 
-KernelReport BenchmarkRunner::profile_reduction_winner(
+KernelAnalysis BenchmarkRunner::profile_reduction_winner(
     KernelReport& report
 )
 {
@@ -857,23 +1047,9 @@ KernelReport BenchmarkRunner::profile_reduction_winner(
     );
 
     report.has_nsight_metrics =
-        metrics.valid;
+    metrics.valid;
 
-	auto classification =
-    	KernelClassifier::classify(
-        	report
-    	);
-	
-	report.kernel_classification =
-    	classification.label;
-	
-	report.classification_confidence =
-    	classification.confidence;
-
-	report.classification_evidence =
-    	classification.evidence;
-    
-    return report;
+    return analyze_kernel(report);
 }
 
 KernelReport
@@ -906,7 +1082,7 @@ BenchmarkRunner::reduction_runner_up() const
         last_reduction_results[1];
 }
 
-KernelReport
+KernelAnalysis
 BenchmarkRunner::profile_vector_add_runner_up(
     KernelReport& report
 )
@@ -924,26 +1100,12 @@ BenchmarkRunner::profile_vector_add_runner_up(
     );
 
     report.has_nsight_metrics =
-        metrics.valid;
+    metrics.valid;
 
-    auto classification =
-        KernelClassifier::classify(
-            report
-        );
-
-    report.kernel_classification =
-        classification.label;
-
-    report.classification_confidence =
-        classification.confidence;
-
-    report.classification_evidence =
-        classification.evidence;
-
-    return report;
+    return analyze_kernel(report);
 }
 
-KernelReport
+KernelAnalysis
 BenchmarkRunner::profile_reduction_runner_up(
     KernelReport& report
 )
@@ -961,21 +1123,7 @@ BenchmarkRunner::profile_reduction_runner_up(
     );
 
     report.has_nsight_metrics =
-        metrics.valid;
+    metrics.valid;
 
-    auto classification =
-        KernelClassifier::classify(
-            report
-        );
-
-    report.kernel_classification =
-        classification.label;
-
-    report.classification_confidence =
-        classification.confidence;
-
-    report.classification_evidence =
-        classification.evidence;
-
-    return report;
+    return analyze_kernel(report);
 }

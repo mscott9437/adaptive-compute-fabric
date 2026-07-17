@@ -294,7 +294,191 @@ BenchmarkHistory::load_csv(
     			token.empty()
     			? 0.0
     			: std::stod(token);
-    	
+
+                std::getline(ss, report.kernel_classification, ',');
+
+                std::getline(ss, token, ',');
+                report.classification_confidence =
+                token.empty() ? 0.0 : std::stod(token);
+
+                std::getline(ss, report.workflow, ',');
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.memory_bound =
+                token.empty()
+                ? false
+                : std::stoi(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.execution_bound =
+                token.empty()
+                ? false
+                : std::stoi(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.scheduler_bound =
+                token.empty()
+                ? false
+                : std::stoi(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.cache_bound =
+                token.empty()
+                ? false
+                : std::stoi(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.execution_pipe_bound =
+                token.empty()
+                ? false
+                : std::stoi(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.memory_pipeline_bound =
+                token.empty()
+                ? false
+                : std::stoi(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.texture_pipeline_bound =
+                token.empty()
+                ? false
+                : std::stoi(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.memory_pressure =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.execution_pressure =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.scheduler_pressure =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.cache_pressure =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.utilization_score =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.cache_hit_ratio =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.fp32_ratio =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.integer_ratio =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
+                std::getline(
+                    ss,
+                    token,
+                    ','
+                );
+
+                report.memory_ratio =
+                token.empty()
+                ? 0.0f
+                : std::stof(token);
+
 		reports.push_back(
     		report
 		);
@@ -632,6 +816,171 @@ BenchmarkHistory::average_efficiency(
         reports.size();
 }
 
+double BenchmarkHistory::average_memory_pressure(
+    const std::vector<KernelReport>& reports
+)
+{
+    if (reports.empty())
+    {
+        return 0.0f;
+    }
+
+    double total = 0.0;
+
+    int count = 0;
+
+    for (const auto& report : reports)
+    {
+        if (report.memory_pressure > 0.0f)
+        {
+            total += report.memory_pressure;
+            ++count;
+        }
+    }
+
+    return count == 0
+    ? 0.0
+    : total / count;
+}
+
+double BenchmarkHistory::average_execution_pressure(
+    const std::vector<KernelReport>& reports
+)
+{
+    if (reports.empty())
+    {
+        return 0.0f;
+    }
+
+    double total = 0.0;
+
+    int count = 0;
+
+    for (const auto& report : reports)
+    {
+        if (report.execution_pressure > 0.0f)
+        {
+            total += report.execution_pressure;
+            ++count;
+        }
+    }
+
+    return count == 0
+    ? 0.0
+    : total / count;
+}
+
+double BenchmarkHistory::average_scheduler_pressure(
+    const std::vector<KernelReport>& reports
+)
+{
+    if (reports.empty())
+    {
+        return 0.0f;
+    }
+
+    double total = 0.0;
+
+    int count = 0;
+
+    for (const auto& report : reports)
+    {
+        if (report.scheduler_pressure > 0.0f)
+        {
+            total += report.scheduler_pressure;
+            ++count;
+        }
+    }
+
+    return count == 0
+    ? 0.0
+    : total / count;
+}
+
+double BenchmarkHistory::average_cache_hit_ratio(
+    const std::vector<KernelReport>& reports
+)
+{
+    if (reports.empty())
+    {
+        return 0.0;
+    }
+
+    double total = 0.0;
+    int count = 0;
+
+    for (const auto& report : reports)
+    {
+        if (report.cache_hit_ratio > 0.0)
+        {
+            total += report.cache_hit_ratio;
+            ++count;
+        }
+    }
+
+    return count == 0
+    ? 0.0
+    : total / count;
+}
+
+std::string
+BenchmarkHistory::most_common_workflow(
+    const std::vector<KernelReport>& reports
+)
+{
+    std::unordered_map<std::string,int> counts;
+
+    for(const auto& report : reports)
+    {
+        counts[report.workflow]++;
+    }
+
+    std::string best;
+
+    int best_count = 0;
+
+    for(const auto& item : counts)
+    {
+        if(item.second > best_count)
+        {
+            best_count = item.second;
+            best = item.first;
+        }
+    }
+
+    return best;
+}
+
+std::string
+BenchmarkHistory::most_common_classification(
+    const std::vector<KernelReport>& reports
+)
+{
+    std::unordered_map<std::string,int> counts;
+
+    for(const auto& report : reports)
+    {
+        counts[
+            report.kernel_classification
+        ]++;
+    }
+
+    std::string best;
+
+    int best_count = 0;
+
+    for(const auto& item : counts)
+    {
+        if(item.second > best_count)
+        {
+            best_count = item.second;
+            best = item.first;
+        }
+    }
+
+    return best;
+}
+
 std::vector<KernelReport>
 BenchmarkHistory::filter_by_gpu(
     const std::vector<KernelReport>& reports,
@@ -687,35 +1036,30 @@ BenchmarkHistory::best_occupancy_report(
     const std::vector<KernelReport>& reports
 )
 {
-    KernelReport best;
-
-    bool first = true;
-
-    for (
-        const auto& report
-        : reports
-    )
+    if (reports.empty())
     {
-        if (
-            first
-            ||
-            report.occupancy >
-            best.occupancy
-        )
-        {
-            best = report;
-            first = false;
-        }
-        else if (
-            report.occupancy ==
-            best.occupancy
-            &&
-            report.runtime_ms <
-            best.runtime_ms
-        )
+        return {};
+    }
+
+    auto best =
+    reports.front();
+
+    for (const auto& report : reports)
+    {
+        if (report.occupancy > best.occupancy)
         {
             best = report;
         }
+        else if
+            (
+                report.occupancy ==
+                best.occupancy &&
+                report.runtime_ms <
+                best.runtime_ms
+            )
+            {
+                best = report;
+            }
     }
 
     return best;

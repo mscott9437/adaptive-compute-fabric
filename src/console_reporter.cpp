@@ -233,7 +233,52 @@ void ConsoleReporter::print_nsight_summary(
     	<< "Barrier Stall: "
     	<< report.stall_barrier_pct
     	<< "%\n";
-    	
+
+    std::cout
+        << "Instructions/Cycle: "
+        << report.inst_executed_per_cycle_active_pct
+        << "%\n";
+
+    std::cout
+        << "Math Pipe Stall: "
+        << report.stall_math_pipe_pct
+        << "%\n";
+
+    std::cout
+        << "MIO Stall: "
+        << report.stall_mio_pct
+        << "%\n";
+
+    std::cout
+        << "Texture Stall: "
+        << report.stall_tex_pipe_pct
+        << "%\n";
+
+    std::cout
+        << "FP32 Instructions: "
+        << report.inst_fp32
+        << "\n";
+
+    std::cout
+        << "Integer Instructions: "
+        << report.inst_integer
+        << "\n";
+
+    std::cout
+        << "Memory Instructions: "
+        << report.inst_memory
+        << "\n";
+
+    std::cout
+        << "L1 Hit Rate: "
+        << report.l1_hit_rate_pct
+        << "%\n";
+
+    std::cout
+        << "L2 Hit Rate: "
+        << report.l2_hit_rate_pct
+        << "%\n";
+
 	if (!report.kernel_classification.empty())
 	{
     	std::cout
@@ -317,4 +362,206 @@ void ConsoleReporter::print_winner_comparison(
         << "Runtime Difference: "
         << delta_pct
         << "%\n";
+}
+
+void ConsoleReporter::print_explanation(
+    const KernelExplanation& explanation
+)
+{
+    std::cout
+        << "\n========================================\n"
+        << "WHY THE WINNER WON\n"
+        << "\n========================================\n\n";
+
+    std::cout
+        << explanation.summary
+        << "\n\n";
+
+    for (const auto& e : explanation.evidence)
+    {
+        std::cout
+            << "- "
+            << e
+            << "\n";
+    }
+}
+
+void ConsoleReporter::print_kernel_state(
+    const KernelState& state
+)
+{
+    std::cout
+    << "\n========================================\n"
+    << "KERNEL STATE\n"
+    << "========================================\n\n";
+
+    std::cout
+    << "Memory Bound: "
+    << (state.memory_bound ? "Yes" : "No")
+    << "\n";
+
+    std::cout
+    << "Execution Bound: "
+    << (state.execution_bound ? "Yes" : "No")
+    << "\n";
+
+    std::cout
+    << "Scheduler Bound: "
+    << (state.scheduler_bound ? "Yes" : "No")
+    << "\n";
+
+    std::cout
+    << "Synchronization Bound: "
+    << (state.synchronization_bound ? "Yes" : "No")
+    << "\n\n";
+
+    std::cout
+    << "Memory Pressure: "
+    << state.memory_pressure
+    << "%\n";
+
+    std::cout
+    << "Execution Pressure: "
+    << state.execution_pressure
+    << "%\n";
+
+    std::cout
+    << "Scheduler Pressure: "
+    << state.scheduler_pressure
+    << "%\n";
+
+    std::cout
+    << "Utilization Score: "
+    << state.utilization_score
+    << "%\n";
+
+    std::cout
+    << "Execution Pipe Pressure: "
+    << state.execution_pipe_pressure
+    << "%\n";
+
+    std::cout
+    << "Memory Pipeline Pressure: "
+    << state.memory_pipeline_pressure
+    << "%\n";
+
+    std::cout
+    << "Texture Pipeline Pressure: "
+    << state.texture_pipeline_pressure
+    << "%\n";
+
+    std::cout
+    << "Cache Hit Ratio: "
+    << state.cache_hit_ratio * 100.0f
+    << "%\n";
+
+    std::cout
+    << "Streaming Memory: "
+    << (state.streaming_memory ? "Yes" : "No")
+    << "\n";
+
+    std::cout
+    << "Cache Friendly: "
+    << (state.cache_friendly ? "Yes" : "No")
+    << "\n";
+
+    std::cout
+    << "Cache Thrashing: "
+    << (state.cache_thrashing ? "Yes" : "No")
+    << "\n";
+
+    std::cout
+    << "Random Access: "
+    << (state.random_access ? "Yes" : "No")
+    << "\n";
+}
+
+void ConsoleReporter::print_classification(
+    const KernelClassification& classification
+)
+{
+    std::cout
+    << "\n========================================\n"
+    << "CLASSIFICATION\n"
+    << "========================================\n\n";
+
+    std::cout
+    << classification.label
+    << "\n";
+
+    std::cout
+    << "Confidence: "
+    << classification.confidence
+    << "%\n";
+
+    for (const auto& e : classification.evidence)
+    {
+        std::cout
+        << "- "
+        << e
+        << "\n";
+    }
+}
+
+void ConsoleReporter::print_optimizer(
+    const KernelOptimization& opt
+)
+{
+    std::cout
+    << "\n========================================\n"
+    << "OPTIMIZATION\n"
+    << "========================================\n\n";
+
+    for (const auto& r : opt.recommendations)
+    {
+        std::cout
+        << "- "
+        << r
+        << "\n";
+    }
+}
+
+void ConsoleReporter::print_ir_summary(
+    const KernelIR& ir
+)
+{
+    std::cout
+    << "\n========================================\n"
+    << "KERNEL IR\n"
+    << "========================================\n\n";
+
+    std::cout
+    << "Kernel: "
+    << ir.kernel
+    << "\n";
+
+    std::cout
+    << "Classification: "
+    << ir.classification.label
+    << "\n";
+
+    std::cout
+    << "Utilization: "
+    << ir.state.utilization_score
+    << "%\n";
+}
+
+void ConsoleReporter::print_workflow(
+    const KernelWorkflow& workflow
+)
+{
+    std::cout
+    << "\n========================================\n"
+    << "WORKFLOW\n"
+    << "========================================\n\n";
+
+    std::cout
+    << "Type: "
+    << workflow.type
+    << "\n";
+
+    std::cout
+    << "Summary: "
+    << workflow.summary
+    << "\n";
 }
